@@ -36,7 +36,7 @@ FROM surnet/alpine-wkhtmltopdf:3.17.0-0.12.6-small as pdf-bin
 
 FROM php:8.1-alpine3.17
 
-EXPOSE 8000
+EXPOSE 80
 WORKDIR /var/www/html
 
 ENV APP_ENV prod
