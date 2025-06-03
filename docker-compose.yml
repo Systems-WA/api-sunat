@@ -17,5 +17,6 @@ services:
       SOL_PASS: MODDATOS
       CORS_ALLOW_ORIGIN: .
       TRUSTED_PROXIES: "127.0.0.1,REMOTE_ADDR"
-    volumes:
-      - .:/var/www/html
+    # volumes:
+    #   - .:/var/www/html
+    #   -/var/www/html/vendor
