@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-ARGS='--host 0.0.0.0 --port 8000'
+ARGS='--host 0.0.0.0 --port 80'
 
 # symfony bootstrap
 ARGS="$ARGS --bootstrap=symfony --app-env=$APP_ENV --logging=0 --debug=0"
