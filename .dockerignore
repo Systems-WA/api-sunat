@@ -2,7 +2,6 @@
 .idea
 tests
 var
-vendor
 .gitattributes
 .gitignore
 .travis.yml
@@ -10,4 +9,3 @@ vendor
 .php_cs.dist
 .php_cs.cache
 phpunit.xml.dist
-*.md
