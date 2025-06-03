@@ -79,4 +79,4 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     php bin/console cache:clear && \
     chmod -R 755 ./data
 
-ENTRYPOINT ["sh", "./docker-entrypoint.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
