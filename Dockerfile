@@ -1,7 +1,7 @@
 FROM php:8.1-alpine3.17 AS build-env
 
-LABEL owner="Giancarlos Salas"
-LABEL maintainer="me@giansalex.dev"
+# LABEL owner="Giancarlos Salas"
+# LABEL maintainer="me@giansalex.dev"
 
 WORKDIR /app
 ENV APP_ENV prod
@@ -46,13 +46,13 @@ ENV CLIENT_TOKEN 123456
 ENV SOL_USER 20161515648MODDATOS
 ENV SOL_PASS MODDATOS
 ENV CORS_ALLOW_ORIGIN .
-ENV FE_URL https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService
-ENV RE_URL https://e-beta.sunat.gob.pe/ol-ti-itemision-otroscpe-gem-beta/billService
-ENV GUIA_URL https://e-beta.sunat.gob.pe/ol-ti-itemision-guia-gem-beta/billService
-ENV AUTH_URL https://gre-test.nubefact.com/v1
-ENV API_URL https://gre-test.nubefact.com/v1
-ENV CLIENT_ID test-85e5b0ae-255c-4891-a595-0b98c65c9854
-ENV CLIENT_SECRET test-Hty/M6QshYvPgItX2P0+Kw==
+# ENV FE_URL https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService
+# ENV RE_URL https://e-beta.sunat.gob.pe/ol-ti-itemision-otroscpe-gem-beta/billService
+# ENV GUIA_URL https://e-beta.sunat.gob.pe/ol-ti-itemision-guia-gem-beta/billService
+# ENV AUTH_URL https://gre-test.nubefact.com/v1
+# ENV API_URL https://gre-test.nubefact.com/v1
+# ENV CLIENT_ID test-85e5b0ae-255c-4891-a595-0b98c65c9854
+# ENV CLIENT_SECRET test-Hty/M6QshYvPgItX2P0+Kw==
 ENV TRUSTED_PROXIES="127.0.0.1,REMOTE_ADDR"
 
 ARG PHP_EXT_DIR=/usr/local/lib/php/extensions/no-debug-non-zts-20210902
