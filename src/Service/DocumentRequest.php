@@ -137,7 +137,7 @@ class DocumentRequest implements DocumentRequestInterface
 
         $parameters = [
             'system' => [
-                'logo' => $params['system']['logo'] ?? $logo,
+                'logo' => !empty($params['system']['logo']) ? file_get_contents($params['system']['logo']) : $logo,
                 'hash' => $this->getHashFromXml($see->getXmlSigned($document)),
             ],
             'user' => [
