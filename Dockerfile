@@ -13,7 +13,6 @@ RUN apk add --no-cache \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    libpng-dev \
     icu-dev \
     libzip-dev \
     libxml2-dev \
@@ -23,7 +22,6 @@ RUN apk add --no-cache \
     libx11 \
     libxrender \
     libxcb \
-    bash \
     && docker-php-ext-install intl zip gd exif soap
 
 # Composer
@@ -40,6 +38,9 @@ COPY . .
 
 # Expone puerto HTTP
 EXPOSE 80
+
+# Eliminar el default.conf conflictivo
+RUN rm -f /etc/nginx/http.d/default.conf
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
     && mkdir -p var/cache var/log \
