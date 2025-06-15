@@ -43,7 +43,8 @@ EXPOSE 80
 RUN rm -f /etc/nginx/http.d/default.conf
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && mkdir -p var/cache var/log \
-    && chown -R www-data:www-data var vendor
+    && mkdir -p var/cache var/log /var/lib/nginx/tmp/client_body \
+    && chown -R www-data:www-data var vendor /var/lib/nginx/tmp/client_body \
+    && chmod 700 /var/lib/nginx/tmp/client_body
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
