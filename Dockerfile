@@ -1,31 +1,18 @@
-FROM surnet/alpine-wkhtmltopdf:3.17.0-0.12.6-small as wkhtmltopdf
+FROM surnet/alpine-wkhtmltopdf:3.17.0-0.12.6-small AS wkhtmltopdf
 
 FROM php:8.2-fpm-alpine
-
-# Variables de entorno
-ENV APP_ENV=prod
-ENV APP_SECRET=
-ENV WKHTMLTOPDF_PATH=wkhtmltopdf
-ENV CLIENT_TOKEN=
-ENV SOL_USER=
-ENV SOL_PASS=
-ENV CORS_ALLOW_ORIGIN=.
-# ENV FE_URL=
-# ENV RE_URL=
-# ENV GUIA_URL=
-# ENV AUTH_URL=
-# ENV API_URL=
-# ENV CLIENT_ID=
-# ENV CLIENT_SECRET=
-ENV TRUSTED_PROXIES="127.0.0.1,REMOTE_ADDR"
 
 # Copiar wkhtmltopdf
 COPY --from=wkhtmltopdf /bin/wkhtmltopdf /usr/bin/
 
 # Instalar extensiones y dependencias
 RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    bash \
     freetype-dev \
     libjpeg-turbo-dev \
+    libpng-dev \
     libpng-dev \
     icu-dev \
     libzip-dev \
@@ -42,15 +29,19 @@ RUN apk add --no-cache \
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
+# Copia configuración de nginx y supervisord
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/supervisord.conf /etc/supervisord.conf
+
 # App directory
 WORKDIR /var/www/html
-
 COPY . .
+
+# Expone puerto HTTP
+EXPOSE 80
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
     && mkdir -p var/cache var/log \
     && chown -R www-data:www-data var vendor
 
-EXPOSE 9000
-
-CMD ["php-fpm"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
