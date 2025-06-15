@@ -1,82 +1,56 @@
-FROM php:8.1-alpine3.17 AS build-env
+FROM surnet/alpine-wkhtmltopdf:3.17.0-0.12.6-small as wkhtmltopdf
 
-# LABEL owner="Giancarlos Salas"
-# LABEL maintainer="me@giansalex.dev"
+FROM php:8.2-fpm-alpine
 
-WORKDIR /app
-ENV APP_ENV prod
-ENV COMPOSER_ALLOW_SUPERUSER=1
+# Variables de entorno
+ENV APP_ENV=prod
+ENV APP_SECRET=
+ENV WKHTMLTOPDF_PATH=wkhtmltopdf
+ENV CLIENT_TOKEN=
+ENV SOL_USER=
+ENV SOL_PASS=
+ENV CORS_ALLOW_ORIGIN=.
+# ENV FE_URL=
+# ENV RE_URL=
+# ENV GUIA_URL=
+# ENV AUTH_URL=
+# ENV API_URL=
+# ENV CLIENT_ID=
+# ENV CLIENT_SECRET=
+ENV TRUSTED_PROXIES="127.0.0.1,REMOTE_ADDR"
 
-# Install php dev dependencies
+# Copiar wkhtmltopdf
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /usr/bin/
+
+# Instalar extensiones y dependencias
 RUN apk add --no-cache \
-    git \
-    unzip \
-    curl \
-    libxml2-dev
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    icu-dev \
+    libzip-dev \
+    libxml2-dev \
+    oniguruma-dev \
+    ttf-freefont \
+    fontconfig \
+    libx11 \
+    libxrender \
+    libxcb \
+    bash \
+    && docker-php-ext-install intl zip gd exif soap
 
-# Install php extensions
-RUN docker-php-ext-install soap && \
-    docker-php-ext-configure opcache --enable-opcache && \
-    docker-php-ext-install opcache && \
-    docker-php-ext-install pcntl
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+# App directory
+WORKDIR /var/www/html
 
 COPY . .
 
-# Install Packages
-RUN curl --silent --show-error -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-    composer install --no-interaction --no-dev --no-autoloader --no-scripts --no-progress --ignore-platform-reqs && \
-    composer require php-pm/php-pm php-pm/httpkernel-adapter --update-no-dev --no-scripts --no-progress --ignore-platform-reqs --with-all-dependencies && \
-    composer dump-autoload --optimize --no-dev --classmap-authoritative && \
-    composer dump-env prod --empty && \
-    find -type f -name '*.md' -delete;
-#   twig have Test as src code
-#   find -name "[Tt]est*" -type d -exec rm -rf {} +
+RUN composer install --no-dev --optimize-autoloader --no-interaction \
+    && mkdir -p var/cache var/log \
+    && chown -R www-data:www-data var vendor
 
-FROM surnet/alpine-wkhtmltopdf:3.17.0-0.12.6-small as pdf-bin
+EXPOSE 9000
 
-FROM php:8.1-alpine3.17
-
-EXPOSE 8000
-WORKDIR /var/www/html
-
-ENV APP_ENV prod
-ENV APP_SECRET c4136a0540553455b122461ab6923e9d
-ENV WKHTMLTOPDF_PATH wkhtmltopdf
-ENV CLIENT_TOKEN 123456
-ENV SOL_USER 20161515648MODDATOS
-ENV SOL_PASS MODDATOS
-ENV CORS_ALLOW_ORIGIN .
-# ENV FE_URL https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService
-# ENV RE_URL https://e-beta.sunat.gob.pe/ol-ti-itemision-otroscpe-gem-beta/billService
-# ENV GUIA_URL https://e-beta.sunat.gob.pe/ol-ti-itemision-guia-gem-beta/billService
-# ENV AUTH_URL https://gre-test.nubefact.com/v1
-# ENV API_URL https://gre-test.nubefact.com/v1
-# ENV CLIENT_ID test-85e5b0ae-255c-4891-a595-0b98c65c9854
-# ENV CLIENT_SECRET test-Hty/M6QshYvPgItX2P0+Kw==
-ENV TRUSTED_PROXIES="127.0.0.1,REMOTE_ADDR"
-
-ARG PHP_EXT_DIR=/usr/local/lib/php/extensions/no-debug-non-zts-20210902
-
-# Install wkhtmltopdf deps
-RUN apk update && apk add --no-cache \
-        libstdc++ \
-        libx11 \
-        libxrender \
-        libxext \
-        libssl1.1 \
-        ca-certificates \
-        fontconfig \
-        freetype \
-        ttf-droid
-
-COPY --from=build-env $PHP_EXT_DIR $PHP_EXT_DIR
-COPY --from=build-env $PHP_INI_DIR/conf.d/ $PHP_INI_DIR/conf.d/
-COPY --from=build-env /app .
-COPY --from=pdf-bin /bin/wkhtmltopdf /usr/bin/
-COPY docker/config/* $PHP_INI_DIR/conf.d/
-COPY docker/docker-entrypoint.sh .
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
-    php bin/console cache:clear && \
-    chmod -R 755 ./data
-
-ENTRYPOINT ["sh", "./docker-entrypoint.sh"]
+CMD ["php-fpm"]
