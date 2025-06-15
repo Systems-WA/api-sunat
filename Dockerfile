@@ -30,6 +30,7 @@ RUN apk add --no-cache \
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Copia configuración de nginx y supervisord
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./docker/supervisord.conf /etc/supervisord.conf
 
