@@ -28,7 +28,7 @@ RUN apk add --no-cache \
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Copia configuración de nginx y supervisord
-# COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./docker/supervisord.conf /etc/supervisord.conf
 
@@ -40,12 +40,12 @@ COPY . .
 EXPOSE 80
 
 # Eliminar el default.conf conflictivo
-RUN rm -f /etc/nginx/http.d/default.conf
+# RUN rm -f /etc/nginx/http.d/default.conf
 
 # Instalar dependencias de PHP y preparar permisos
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
     && mkdir -p var/cache var/log /var/lib/nginx/tmp/client_body \
-    && chown -R nginx:nginx var vendor data /var/lib/nginx \
+    && chown -R www-data:www-data var vendor data /var/lib/nginx \
     && chmod -R 755 data \
     && find /var/lib/nginx -type d -exec chmod 755 {} \; \
     && find /var/lib/nginx -type f -exec chmod 644 {} \;
